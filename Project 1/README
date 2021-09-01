@@ -1,0 +1,23 @@
+Jared Staman
+
+CS 423: Project 1
+
+How to run code:
+python main.py
+
+
+This project reads in a csv file named "applicants.csv" that has 6 test scores for each applicant, 5 CS classes and 1 non-CS class.
+The program sends the applicants' test scores to 4 different analyze applicant functions. 
+The first function tests if applicants have an average above 85.
+The second function tests whether the applicants have no grade below 65.
+The third function tests if they have at least 4 grades above 85.
+The fourth function tests if they have an average above 85 in their 5 CS courses.
+
+If an applicant passes all 4 functions, then they receive an "ACCEPT".
+If they do not pass all 4, then they receive a "REJECT".
+
+
+Ethical Statement:
+This code was written solely by me, Jared Staman. This software is permissible for real-world use at the risk of the
+user. The program works correctly but has no security or error checks. 
+
