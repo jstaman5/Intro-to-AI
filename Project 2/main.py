@@ -39,6 +39,15 @@ def main():
             if(char == '0' or char == '1'):
                 row.append(char)
         grid.append(row)
+
+    #check if grid is in M x N format
+    for row in grid:
+        if len(row) == len(grid[0]):
+            pass
+        else:
+            print("Must be in M x N format")
+            sys.exit()
+
     
     #pprint.pprint(grid)
 
