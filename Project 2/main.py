@@ -2,6 +2,89 @@
 import sys
 import pprint
 
+def isValid(grid, row, col, visited):
+        if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
+            if(grid[row][col] == '0'):
+                for coord in visited:
+                    if(row == coord[0] and col == coord[1]):
+                        return False
+                return True
+        
+        return False
+
+class Node:
+    def __init__(self, prev, tuple):
+        self.prev = prev
+        self.row = tuple[0]
+        self.col = tuple[1]
+        self.tuple = tuple
+
+class PathPlanner:
+    def __init__(self, grid):
+        self.grid = grid
+    
+    def breadth_first_search(self, start, goal):
+        queue = []
+        visited = []
+
+        count = 0
+        start_node = Node(None, start)
+        queue.append(start_node)
+        visited.append(start)
+
+        while(queue):
+            curr = queue.pop(0)
+            count += 1
+            #visited.append(curr.tuple)
+
+            if(curr.tuple == goal):
+                path = []
+                while(curr.prev != None):
+                    path.insert(0,curr.tuple)
+                    curr = curr.prev
+                print(f"Path: {path}")
+                print(f"Traversed: {count}")
+                return
+
+            curr_row = curr.row
+            curr_col = curr.col
+            #add to queue
+            #down
+            if(isValid(self.grid, curr_row+1, curr_col, visited)):
+                new = (curr_row+1, curr_col)
+                new_node = Node(curr, new)
+                queue.append(new_node)
+                visited.append(new_node.tuple)
+
+            #right
+            if(isValid(self.grid, curr_row, curr_col+1, visited)):
+                new = (curr_row, curr_col+1)
+                new_node = Node(curr, new)
+                queue.append(new_node)
+                visited.append(new_node.tuple)
+
+            #up
+            if(isValid(self.grid, curr_row-1, curr_col, visited)):
+                new = (curr_row-1, curr_col)
+                new_node = Node(curr, new)
+                queue.append(new_node)
+                visited.append(new_node.tuple)
+
+            #left
+            if(isValid(self.grid, curr_row, curr_col-1, visited)):
+                new = (curr_row, curr_col-1)
+                new_node = Node(curr, new)
+                queue.append(new_node)
+                visited.append(new_node.tuple)
+            
+        return -1
+
+    def depth_first_search(self, start, goal):
+        return
+
+    def a_star_search(self, start, goal):
+        return
+
 def main():
 
     usage = "python main.py --input FILENAME --start START_NODE --goal GOAL_NODE --search SEARCH_TYPE"
@@ -39,7 +122,7 @@ def main():
             if(char == '0' or char == '1'):
                 row.append(char)
         grid.append(row)
-    
+
     #pprint.pprint(grid)
 
     if(sys.argv[3] != "--start"):
@@ -151,6 +234,10 @@ def main():
     if search not in search_list:
         print("Invalid search type")
         sys.exit()
+
+    start = (start_row, start_col)
+    goal =(goal_row, goal_col)
+    PathPlanner(grid).breadth_first_search(start, goal)
 
     return
 
