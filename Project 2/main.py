@@ -123,6 +123,18 @@ def main():
                 row.append(char)
         grid.append(row)
 
+<<<<<<< HEAD
+=======
+    #check if grid is in M x N format
+    for row in grid:
+        if len(row) == len(grid[0]):
+            pass
+        else:
+            print("Must be in M x N format")
+            sys.exit()
+
+    
+>>>>>>> 142471501e993648ce22f0a0d43e28e6a1d8d61d
     #pprint.pprint(grid)
 
     if(sys.argv[3] != "--start"):
