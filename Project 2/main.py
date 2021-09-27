@@ -15,12 +15,24 @@ def isValid(grid, row, col, visited):
             return True
     
     return False
+
+def dfsValid(grid, row, col):
+    if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
+        if(grid[row][col] == '0'):
+            return True
+    return False
+
+def dfsVisited(node, tuple):
+    while(node.prev):
+        if(tuple == node.tuple):
+            return False
+        node = node.prev
+    return True
     
-def dfs_recursive(grid, node, goal, visited):
+def dfs_recursive(grid, node, goal):
     global DFS_TRAVERSALS
     DFS_TRAVERSALS += 1
     curr = node
-    print(curr.tuple)
     global SHORTEST_PATH
     if(curr.tuple == goal):
         if(curr.depth < SHORTEST_PATH):
@@ -37,32 +49,32 @@ def dfs_recursive(grid, node, goal, visited):
     curr_row = node.row
     curr_col = node.col
     #bottom
-    if(isValid(grid, curr_row+1, curr_col, visited)):
+    if(dfsValid(grid, curr_row+1, curr_col) and dfsVisited(curr, (curr_row+1, curr_col))):
         new = (curr_row+1, curr_col)
         new_node = Node(curr, new, curr.depth + 1)
-        visited.append(new_node.tuple)
-        dfs_recursive(grid, new_node, goal, visited)
+        #visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal)
 
     #right
-    if(isValid(grid, curr_row, curr_col+1, visited)):
+    if(dfsValid(grid, curr_row, curr_col+1) and dfsVisited(curr, (curr_row, curr_col+1))):
         new = (curr_row, curr_col+1)
         new_node = Node(curr, new, curr.depth + 1)
-        visited.append(new_node.tuple)
-        dfs_recursive(grid, new_node, goal, visited)
+        #visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal)
 
     #up
-    if(isValid(grid, curr_row-1, curr_col, visited)):
+    if(dfsValid(grid, curr_row-1, curr_col) and dfsVisited(curr, (curr_row-1, curr_col))):
         new = (curr_row-1, curr_col)
         new_node = Node(curr, new, curr.depth + 1)
-        visited.append(new_node.tuple)
-        dfs_recursive(grid, new_node, goal, visited)
+        #visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal)
 
     #left
-    if(isValid(grid, curr_row, curr_col-1, visited)):
+    if(dfsValid(grid, curr_row, curr_col-1) and dfsVisited(curr, (curr_row-1, curr_col))):
         new = (curr_row, curr_col-1)
         new_node = Node(curr, new, curr.depth + 1)
-        visited.append(new_node.tuple)
-        dfs_recursive(grid, new_node, goal, visited)
+        #visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal)
 
 
 class Node:
@@ -136,13 +148,12 @@ class PathPlanner:
 
     def depth_first_search(self, start, goal):
 
-        visited = []
 
         start_node = Node(None, start, 1)
-        visited.append(start)
-        dfs_recursive(self.grid, start_node, goal, visited)
+        dfs_recursive(self.grid, start_node, goal)
         global DFS_PATH
         global DFS_TRAVERSALS
+        DFS_PATH.insert(0, start)
         print(f"Path: {DFS_PATH}")
         print(f"Traversals: {DFS_TRAVERSALS}")
         return
