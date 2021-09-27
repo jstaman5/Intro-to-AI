@@ -70,7 +70,7 @@ def dfs_recursive(grid, node, goal):
         dfs_recursive(grid, new_node, goal)
 
     #left
-    if(dfsValid(grid, curr_row, curr_col-1) and dfsVisited(curr, (curr_row-1, curr_col))):
+    if(dfsValid(grid, curr_row, curr_col-1) and dfsVisited(curr, (curr_row, curr_col-1))):
         new = (curr_row, curr_col-1)
         new_node = Node(curr, new, curr.depth + 1)
         #visited.append(new_node.tuple)
