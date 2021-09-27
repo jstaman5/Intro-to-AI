@@ -1,6 +1,7 @@
 #Jared Staman
 import sys
 import pprint
+from math import sqrt
 
 SHORTEST_PATH = 100000
 DFS_TRAVERSALS = 0
@@ -76,14 +77,20 @@ def dfs_recursive(grid, node, goal):
         #visited.append(new_node.tuple)
         dfs_recursive(grid, new_node, goal)
 
+def calcH(tuple, goal):
+    H = sqrt((tuple[0]-goal[0])**2 + (tuple[1]-goal[1])**2)
+    return H
 
 class Node:
-    def __init__(self, prev, tuple, depth=0):
+    def __init__(self, prev, tuple, depth=0, g=0, h=0, f=0):
         self.prev = prev
         self.row = tuple[0]
         self.col = tuple[1]
         self.tuple = tuple
         self.depth = depth
+        self.g = g
+        self.h = h
+        self.f = f
 
 class PathPlanner:
 
@@ -159,6 +166,103 @@ class PathPlanner:
         return
 
     def a_star_search(self, start, goal):
+
+        traversals = 0       
+        open_list = []
+        closed_list = []
+
+        start_node = Node(None,start)
+        goal_node = Node(None, goal)
+
+        open_list.append(start_node)
+
+        while(open_list):
+            #Priority Queue, find node in open list with smallest f value
+            curr = open_list[0]
+            index = 0
+            for i, node in enumerate(open_list):
+                if(node.f < curr.f):
+                    curr = node
+                    index = i
+            
+            open_list.pop(index)
+            closed_list.append(curr)
+            traversals += 1
+            if curr.tuple == goal:
+                path = []
+                while(curr):
+                    path.insert(0,curr.tuple)
+                    curr = curr.prev
+                print(f"Path: {path}")
+                print(f"Traversals: {traversals}")
+                return
+            
+            curr_row = curr.row 
+            curr_col = curr.col
+
+            #bottom
+            if(dfsValid(self.grid, curr_row+1, curr_col)):
+                new = (curr_row+1, curr_col)
+                new_node = Node(curr, new)
+                for closed_child in closed_list:
+                    if new_node == closed_child:
+                        continue
+                new_node.g = curr.g + 1
+                new_node.h = calcH(new_node.tuple,goal)
+                new_node.f = new_node.g + new_node.h
+
+                for open_node in open_list:
+                    if(new_node == open_node and new_node.g > open_node.g):
+                        continue
+                open_list.append(new_node)
+
+            #right
+            if(dfsValid(self.grid, curr_row, curr_col+1)):
+                new = (curr_row, curr_col+1)
+                new_node = Node(curr, new)
+                for closed_child in closed_list:
+                    if new_node == closed_child:
+                        continue
+                new_node.g = curr.g + 1
+                new_node.h = calcH(new_node.tuple,goal)
+                new_node.f = new_node.g + new_node.h
+
+                for open_node in open_list:
+                    if(new_node == open_node and new_node.g > open_node.g):
+                        continue
+                open_list.append(new_node)
+
+            #up
+            if(dfsValid(self.grid, curr_row-1, curr_col)):
+                new = (curr_row-1, curr_col)
+                new_node = Node(curr, new)
+                for closed_child in closed_list:
+                    if new_node == closed_child:
+                        continue
+                new_node.g = curr.g + 1
+                new_node.h = calcH(new_node.tuple,goal)
+                new_node.f = new_node.g + new_node.h
+
+                for open_node in open_list:
+                    if(new_node == open_node and new_node.g > open_node.g):
+                        continue
+                open_list.append(new_node)
+
+            #left
+            if(dfsValid(self.grid, curr_row, curr_col-1)):
+                new = (curr_row, curr_col-1)
+                new_node = Node(curr, new)
+                for closed_child in closed_list:
+                    if new_node == closed_child:
+                        continue
+                new_node.g = curr.g + 1
+                new_node.h = calcH(new_node.tuple,goal)
+                new_node.f = new_node.g + new_node.h
+
+                for open_node in open_list:
+                    if(new_node == open_node and new_node.g > open_node.g):
+                        continue
+                open_list.append(new_node)
         return
 
 def main():
@@ -313,7 +417,7 @@ def main():
 
     start = (start_row, start_col)
     goal =(goal_row, goal_col)
-    PathPlanner(grid).depth_first_search(start, goal)
+    PathPlanner(grid).a_star_search(start, goal)
 
     return
 
