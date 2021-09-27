@@ -2,24 +2,79 @@
 import sys
 import pprint
 
+SHORTEST_PATH = 100000
+DFS_TRAVERSALS = 0
+DFS_PATH = []
+
 def isValid(grid, row, col, visited):
-        if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
-            if(grid[row][col] == '0'):
-                for coord in visited:
-                    if(row == coord[0] and col == coord[1]):
-                        return False
-                return True
-        
-        return False
+    if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
+        if(grid[row][col] == '0'):
+            for coord in visited:
+                if(row == coord[0] and col == coord[1]):
+                    return False
+            return True
+    
+    return False
+    
+def dfs_recursive(grid, node, goal, visited):
+    global DFS_TRAVERSALS
+    DFS_TRAVERSALS += 1
+    curr = node
+    print(curr.tuple)
+    global SHORTEST_PATH
+    if(curr.tuple == goal):
+        if(curr.depth < SHORTEST_PATH):
+            SHORTEST_PATH = curr.depth
+            global DFS_PATH
+            DFS_PATH = []
+            while(curr.prev):
+                DFS_PATH.insert(0,curr.tuple)
+                curr = curr.prev
+            return
+    #if(curr.depth >= SHORTEST_PATH-1):
+        #return    
+
+    curr_row = node.row
+    curr_col = node.col
+    #bottom
+    if(isValid(grid, curr_row+1, curr_col, visited)):
+        new = (curr_row+1, curr_col)
+        new_node = Node(curr, new, curr.depth + 1)
+        visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal, visited)
+
+    #right
+    if(isValid(grid, curr_row, curr_col+1, visited)):
+        new = (curr_row, curr_col+1)
+        new_node = Node(curr, new, curr.depth + 1)
+        visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal, visited)
+
+    #up
+    if(isValid(grid, curr_row-1, curr_col, visited)):
+        new = (curr_row-1, curr_col)
+        new_node = Node(curr, new, curr.depth + 1)
+        visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal, visited)
+
+    #left
+    if(isValid(grid, curr_row, curr_col-1, visited)):
+        new = (curr_row, curr_col-1)
+        new_node = Node(curr, new, curr.depth + 1)
+        visited.append(new_node.tuple)
+        dfs_recursive(grid, new_node, goal, visited)
+
 
 class Node:
-    def __init__(self, prev, tuple):
+    def __init__(self, prev, tuple, depth=0):
         self.prev = prev
         self.row = tuple[0]
         self.col = tuple[1]
         self.tuple = tuple
+        self.depth = depth
 
 class PathPlanner:
+
     def __init__(self, grid):
         self.grid = grid
     
@@ -80,6 +135,16 @@ class PathPlanner:
         return -1
 
     def depth_first_search(self, start, goal):
+
+        visited = []
+
+        start_node = Node(None, start, 1)
+        visited.append(start)
+        dfs_recursive(self.grid, start_node, goal, visited)
+        global DFS_PATH
+        global DFS_TRAVERSALS
+        print(f"Path: {DFS_PATH}")
+        print(f"Traversals: {DFS_TRAVERSALS}")
         return
 
     def a_star_search(self, start, goal):
@@ -237,7 +302,7 @@ def main():
 
     start = (start_row, start_col)
     goal =(goal_row, goal_col)
-    PathPlanner(grid).breadth_first_search(start, goal)
+    PathPlanner(grid).depth_first_search(start, goal)
 
     return
 
