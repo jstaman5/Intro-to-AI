@@ -1,13 +1,23 @@
 #Jared Staman
+#CS 423 Project 2: Path Planning
+#This code takes in a grid, start coord, goal coord, and a search algorithm (BFS, DFS, A*).
+#It then prints the shortest path using the specified algorithm along with how many traversals it went through
+
 import sys
 import pprint
 from math import sqrt
 
+#global variables used in dfs to keep track of shortest path and traversals
 SHORTEST_PATH = 100000
 DFS_TRAVERSALS = 0
 DFS_PATH = []
 
 def isValid(grid, row, col, visited):
+    '''
+    This function is used in BFS. It checks whether the given coordinate is in the grid.
+    It also checks to make sure the value at the coordinate is a '0' not a '1'
+    Finally, it checks to make sure we have not already visited this coordinate
+    '''
     if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
         if(grid[row][col] == '0'):
             for coord in visited:
@@ -18,12 +28,21 @@ def isValid(grid, row, col, visited):
     return False
 
 def dfsValid(grid, row, col):
+    '''
+    This function is used in DFS and A*.
+    It checks whether the given coordinate is in the grid.
+    Also, it checks to make sure the value at the coordiante is a '0' and not a '1'
+    '''
     if(row >= 0 and col >= 0 and row < len(grid) and col < len(grid[0])):
         if(grid[row][col] == '0'):
             return True
     return False
 
 def dfsVisited(node, tuple):
+    '''
+    This function is used in DFS.
+    It checks whether this path has already checked a given coordinate. If it has, then we shouldn't go there again.
+    '''
     while(node.prev):
         if(tuple == node.tuple):
             return False
@@ -31,6 +50,12 @@ def dfsVisited(node, tuple):
     return True
     
 def dfs_recursive(grid, node, goal):
+    '''
+    This function is the recursive part for our DFS algorithm.
+    First it checks whether we are at the goal.
+    Then it branches into its children, checking if they are valid coordinates.
+    If they are then, then we go there and call the recursive function
+    '''
     global DFS_TRAVERSALS
     DFS_TRAVERSALS += 1
     curr = node
@@ -40,10 +65,14 @@ def dfs_recursive(grid, node, goal):
             SHORTEST_PATH = curr.depth
             global DFS_PATH
             DFS_PATH = []
-            while(curr.prev):
+            while(curr):
                 DFS_PATH.insert(0,curr.tuple)
                 curr = curr.prev
             return
+    '''
+    This following commented out code, if uncommented out, will significantly lower the amount of traversals.
+    This is because the code cuts of paths that already have a longer length than a previously found shortest path.
+    '''
     #if(curr.depth >= SHORTEST_PATH-1):
         #return    
 
@@ -53,36 +82,37 @@ def dfs_recursive(grid, node, goal):
     if(dfsValid(grid, curr_row+1, curr_col) and dfsVisited(curr, (curr_row+1, curr_col))):
         new = (curr_row+1, curr_col)
         new_node = Node(curr, new, curr.depth + 1)
-        #visited.append(new_node.tuple)
         dfs_recursive(grid, new_node, goal)
 
     #right
     if(dfsValid(grid, curr_row, curr_col+1) and dfsVisited(curr, (curr_row, curr_col+1))):
         new = (curr_row, curr_col+1)
         new_node = Node(curr, new, curr.depth + 1)
-        #visited.append(new_node.tuple)
         dfs_recursive(grid, new_node, goal)
 
     #up
     if(dfsValid(grid, curr_row-1, curr_col) and dfsVisited(curr, (curr_row-1, curr_col))):
         new = (curr_row-1, curr_col)
         new_node = Node(curr, new, curr.depth + 1)
-        #visited.append(new_node.tuple)
         dfs_recursive(grid, new_node, goal)
 
     #left
     if(dfsValid(grid, curr_row, curr_col-1) and dfsVisited(curr, (curr_row, curr_col-1))):
         new = (curr_row, curr_col-1)
         new_node = Node(curr, new, curr.depth + 1)
-        #visited.append(new_node.tuple)
         dfs_recursive(grid, new_node, goal)
 
 def calcH(tuple, goal):
-    H = sqrt((tuple[0]-goal[0])**2 + (tuple[1]-goal[1])**2)
+    '''
+    This is a helper function that calculates the H value used in A*
+    '''
+    H = (((tuple[0]-goal[0])**2) + ((tuple[1]-goal[1])**2))
     return H
 
 class Node:
-    def __init__(self, prev, tuple, depth=0, g=0, h=0, f=0):
+
+    #Constructor for our Node.
+    def __init__(self, prev, tuple, depth=0, g = 0, h = 0, f = 0):
         self.prev = prev
         self.row = tuple[0]
         self.col = tuple[1]
@@ -92,12 +122,19 @@ class Node:
         self.h = h
         self.f = f
 
-class PathPlanner:
 
+class PathPlanner:
+    #Constructor for our pathplanner (sets grid)
     def __init__(self, grid):
         self.grid = grid
     
+
     def breadth_first_search(self, start, goal):
+        '''
+        This is the breadth first search function. It loops through a queue, first checking if the coordinate
+        we are at is the goal coordinate. If it isn't then we check our current node's neighbors to see if we can go there.
+        We then add valid neighbors to our queue and also to our visited list to keep track of where we have been.
+        '''
         queue = []
         visited = []
 
@@ -109,11 +146,11 @@ class PathPlanner:
         while(queue):
             curr = queue.pop(0)
             count += 1
-            #visited.append(curr.tuple)
-
+            
+            #check if we are at goal
             if(curr.tuple == goal):
                 path = []
-                while(curr.prev != None):
+                while(curr):
                     path.insert(0,curr.tuple)
                     curr = curr.prev
                 print(f"Path: {path}")
@@ -122,6 +159,7 @@ class PathPlanner:
 
             curr_row = curr.row
             curr_col = curr.col
+
             #add to queue
             #down
             if(isValid(self.grid, curr_row+1, curr_col, visited)):
@@ -154,116 +192,149 @@ class PathPlanner:
         return -1
 
     def depth_first_search(self, start, goal):
-
-
+        '''
+        This function performs our depth first search. It mainly just calls the recursive function and then prints the results.
+        '''
         start_node = Node(None, start, 1)
         dfs_recursive(self.grid, start_node, goal)
         global DFS_PATH
         global DFS_TRAVERSALS
-        DFS_PATH.insert(0, start)
-        print(f"Path: {DFS_PATH}")
-        print(f"Traversals: {DFS_TRAVERSALS}")
+        if (DFS_PATH == []):
+            print("Could not find a path")
+        else:
+            print(f"Path: {DFS_PATH}")
+            print(f"Traversed: {DFS_TRAVERSALS}")
+        
         return
 
     def a_star_search(self, start, goal):
-
-        traversals = 0       
+        
+        '''
+        Similar to BFS in which we loop through a queue, except we treat this one more as a priority queue.
+        The priority is based off of the f value, which is g + h. g is the spots away from the start. h is the 
+        euclidean distance from the goal. Loop through the queue, checking if we are at the goal and adding neighbors to the queue.
+        '''
+        start_node = Node(None, start)
         open_list = []
         closed_list = []
-
-        start_node = Node(None,start)
-        goal_node = Node(None, goal)
+        traversals = 0
 
         open_list.append(start_node)
 
         while(open_list):
-            #Priority Queue, find node in open list with smallest f value
-            curr = open_list[0]
-            index = 0
-            for i, node in enumerate(open_list):
-                if(node.f < curr.f):
-                    curr = node
-                    index = i
-            
-            open_list.pop(index)
-            closed_list.append(curr)
+            #check to make sure there is a path
+            if (traversals > 10000):
+                break
+            #get the current node with the lowest f value
+            current_node = open_list[0]
+            current_index = 0
+            for index, item in enumerate(open_list):
+                if item.f < current_node.f:
+                    current_node = item
+                    current_index = index
+
+            open_list.pop(current_index)
+            closed_list.append(current_node)
+
             traversals += 1
-            if curr.tuple == goal:
+
+            #check if we are at the goal
+            if(current_node.tuple == goal):
                 path = []
-                while(curr):
-                    path.insert(0,curr.tuple)
-                    curr = curr.prev
+                current = current_node
+                while(current):
+                    path.insert(0,current.tuple)
+                    current = current.prev
                 print(f"Path: {path}")
-                print(f"Traversals: {traversals}")
+                print(f"Traversed: {traversals}")
                 return
             
-            curr_row = curr.row 
-            curr_col = curr.col
-
-            #bottom
+            #generate children
+            curr_row = current_node.row
+            curr_col = current_node.col
+        
+            #down
             if(dfsValid(self.grid, curr_row+1, curr_col)):
                 new = (curr_row+1, curr_col)
-                new_node = Node(curr, new)
-                for closed_child in closed_list:
-                    if new_node == closed_child:
+                new_node = Node(current_node, new)
+
+                #skip if child is in closed_list (seen it already)
+                for node in closed_list:
+                    if new_node == node:
                         continue
-                new_node.g = curr.g + 1
-                new_node.h = calcH(new_node.tuple,goal)
+                
+                #creating the f, g, h values for the node
+                new_node.g = current_node.g + 1
+                new_node.h = calcH(new_node.tuple, goal)
                 new_node.f = new_node.g + new_node.h
 
-                for open_node in open_list:
-                    if(new_node == open_node and new_node.g > open_node.g):
+                #skip if child is already in open list
+                for node in open_list:
+                    if new_node == node and new_node.g > node.g:
                         continue
+                
                 open_list.append(new_node)
+             
 
             #right
             if(dfsValid(self.grid, curr_row, curr_col+1)):
                 new = (curr_row, curr_col+1)
-                new_node = Node(curr, new)
-                for closed_child in closed_list:
-                    if new_node == closed_child:
+                new_node = Node(current_node, new)
+                for node in closed_list:
+                    if new_node == node:
                         continue
-                new_node.g = curr.g + 1
-                new_node.h = calcH(new_node.tuple,goal)
+                
+                new_node.g = current_node.g + 1
+                new_node.h = calcH(new_node.tuple, goal)
                 new_node.f = new_node.g + new_node.h
 
-                for open_node in open_list:
-                    if(new_node == open_node and new_node.g > open_node.g):
+                for node in open_list:
+                    if new_node == node and new_node.g > node.g:
                         continue
+                
                 open_list.append(new_node)
+              
 
             #up
             if(dfsValid(self.grid, curr_row-1, curr_col)):
                 new = (curr_row-1, curr_col)
-                new_node = Node(curr, new)
-                for closed_child in closed_list:
-                    if new_node == closed_child:
+                new_node = Node(current_node, new)
+                for node in closed_list:
+                    if new_node == node:
                         continue
-                new_node.g = curr.g + 1
-                new_node.h = calcH(new_node.tuple,goal)
+                
+                new_node.g = current_node.g + 1
+                new_node.h = calcH(new_node.tuple, goal)
                 new_node.f = new_node.g + new_node.h
 
-                for open_node in open_list:
-                    if(new_node == open_node and new_node.g > open_node.g):
+                for node in open_list:
+                    if new_node == node and new_node.g > node.g:
                         continue
+                
                 open_list.append(new_node)
+               
 
             #left
             if(dfsValid(self.grid, curr_row, curr_col-1)):
                 new = (curr_row, curr_col-1)
-                new_node = Node(curr, new)
-                for closed_child in closed_list:
-                    if new_node == closed_child:
+                new_node = Node(current_node, new)
+                for node in closed_list:
+                    if new_node == node:
                         continue
-                new_node.g = curr.g + 1
-                new_node.h = calcH(new_node.tuple,goal)
+                
+                new_node.g = current_node.g + 1
+                new_node.h = calcH(new_node.tuple, goal)
                 new_node.f = new_node.g + new_node.h
 
-                for open_node in open_list:
-                    if(new_node == open_node and new_node.g > open_node.g):
+                for node in open_list:
+                    if new_node == node and new_node.g > node.g:
                         continue
+                
                 open_list.append(new_node)
-        return
+               
+            
+        return -1
+
 
 def main():
 
@@ -417,8 +488,26 @@ def main():
 
     start = (start_row, start_col)
     goal =(goal_row, goal_col)
-    PathPlanner(grid).a_star_search(start, goal)
 
+    #calling functions depending on search type
+    if(search == "BFS"):
+        if (PathPlanner(grid).breadth_first_search(start, goal) == -1):
+            print("Could not find a path")
+    elif (search == "DFS"):
+        PathPlanner(grid).depth_first_search(start, goal)
+    elif (search == "A*"):
+        if (PathPlanner(grid).a_star_search(start, goal) == -1):
+            print("Could not find a path")
+    elif (search == "ALL"):
+        print("Algorithm: BFS")
+        if (PathPlanner(grid).breadth_first_search(start,goal) == -1):
+            print("Could not find a path")
+        print('\n' + "Algorithm: DFS")
+        PathPlanner(grid).depth_first_search(start, goal)
+        print('\n' + "Algorithm: A*")
+        if (PathPlanner(grid).a_star_search(start, goal) == -1):
+            print("Could not find a path")
+    
     return
 
 
