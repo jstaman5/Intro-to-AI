@@ -28,7 +28,7 @@ def main():
     #split our test and training data
     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size = .8, random_state = 0)
     
-    #Coarse Grid Search on hyperparameters
+    #Coarse Grid Search on hyperparameters (commented out to run the fine grid search)
     '''tuned_parameters = [
         {
             'kernel': ['linear'], 
@@ -50,7 +50,7 @@ def main():
         print("# Tuning hyper-parameters for %s" % score)
         print()
         clf = GridSearchCV(
-            SVC(), tuned_parameters, scoring='%s_macro' % score
+            SVC(), tuned_parameters, scoring='%s_macro' % score, cv=5
         )
         clf.fit(x_train, y_train)
         print("Best parameters set found on development set:")
@@ -81,8 +81,8 @@ def main():
 
     #From the coarse grid search: our best hyperparamters were linear and C=100
     #Fine Search to fine tune the C hyperparameter
-    #We are looking for the smallest C value that still gives a 1.000
-    #Our result was C = 34
+    #I'm looking for the smallest C value that still gives a 1.000
+    #My result was C = 34
     l = [i for i in range(30,50,1)]
     tuned_parameters = [
         {
@@ -95,7 +95,7 @@ def main():
         print("# Tuning hyper-parameters for %s" % score)
         print()
         clf = GridSearchCV(
-            SVC(), tuned_parameters, scoring='%s_macro' % score
+            SVC(), tuned_parameters, scoring='%s_macro' % score, cv = 5
         )
         clf.fit(x_train, y_train)
         print("Best parameters set found on development set:")
